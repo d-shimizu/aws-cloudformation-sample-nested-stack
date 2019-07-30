@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  vpcStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      #TemplateURL: ./vpc.yml
+      TemplateURL: ./vpc/master.yml
+  EC2Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      #TemplateURL: ./ec2.yml
+      TemplateURL: ./ec2/master.yml
+      Parameters:
+        VpcId: !GetAtt vpcStack.Outputs.VpcId
+        SubnetId: !GetAtt vpcStack.Outputs.SubnetId

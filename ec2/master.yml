@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ProjectNameParameter:
+    Type: String
+    Default: 'sample-cfn'
+    Description: Project name for tag
+  VpcId: # 受け取る値を定義する
+    Type: 'AWS::EC2::VPC::Id'
+  SubnetId:
+    Type: 'AWS::EC2::Subnet::Id'
+Resources:
+  EC2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      DisableApiTermination: 'false'
+      InstanceInitiatedShutdownBehavior: stop
+      ImageId: ami-00f9d04b3b3092052
+      InstanceType: t2.micro
+      KeyName: ec2-key-pair-apn1
+      Monitoring: 'false'
+      #VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectNameParameter}-ec2"
+          #Value: sample-cfn-ec2
+      NetworkInterfaces:
+        - DeleteOnTermination: 'true'
+          Description: Primary network interface
+          DeviceIndex: 0
+          SubnetId: !Ref SubnetId
+            #"Fn::ImportValue": !Sub "${ProjectNameParameter}-subnet"
+            #{ "Fn::ImportValue": !Sub "${ProjectNameParameter}-web-public-1a-subnet" }
+          PrivateIpAddresses:
+            - PrivateIpAddress: 10.1.1.45
+              Primary: 'true'
+          GroupSet:
+            - !Ref sg1
+          AssociatePublicIpAddress: 'true'
+          #Properties:
+  sg1:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'sample-cfn-sg'
+      VpcId: !Ref VpcId
+        #"Fn::ImportValue": !Sub "${ProjectNameParameter}-vpc"
+      SecurityGroupIngress:
+        IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        IpProtocol: '-1'
+        CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: 'Name'
+          Value: 'sample-cfn-sg'
+#  ingress1:
+#    Type: 'AWS::EC2::SecurityGroupIngress'
+#    Properties:
+#      GroupId: !Ref sg1
+#      IpProtocol: tcp
+#      FromPort: '22'
+#      ToPort: '22'
+#      CidrIp: 0.0.0.0/0
+#  egress1:
+#    Type: 'AWS::EC2::SecurityGroupEgress'
+#    Properties:
+#      GroupId: !Ref sg1
+#      IpProtocol: '-1'
+#      CidrIp: 0.0.0.0/0
+
